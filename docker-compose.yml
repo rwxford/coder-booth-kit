@@ -1,0 +1,66 @@
+# UAV Defense Simulator on the booth MacBook.
+# Adapted from coder/usg-edge stacks/uav/compose.yaml for Docker Desktop.
+# Images come from the docker-save tarballs in bppRomperRoom/coder-edge-kit/images/uav
+# (loaded by 10-uav-up.sh). They are linux/amd64; Docker Desktop runs them under Rosetta.
+#
+#   frontend  -> http://localhost:8081        (map UI; /arm.html re-arms the demo)
+#   mcp       -> http://localhost:3030/mcp    (streamable HTTP; exposed to Coder via cloudflared)
+#   backend   -> internal only (its API has no auth)
+
+services:
+  uav-backend:
+    image: uav/backend:d20d480
+    platform: linux/amd64
+    container_name: uav-backend
+    restart: unless-stopped
+    networks:
+      uav:
+        aliases: [backend]
+    environment:
+      RUST_LOG: info
+      OPENWEATHER_API_KEY: ""
+    volumes:
+      - uav_flight_logs:/app/flight_logs
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  uav-frontend:
+    image: uav/frontend:d20d480
+    platform: linux/amd64
+    container_name: uav-frontend
+    restart: unless-stopped
+    networks: [uav]
+    ports:
+      - "8081:80"
+    volumes:
+      - ./arm.html:/usr/share/nginx/html/arm.html:ro
+      - ./brand:/usr/share/nginx/html/brand:ro
+    depends_on:
+      uav-backend:
+        condition: service_healthy
+
+  uav-mcp:
+    image: uav/mcp-server:d20d480
+    platform: linux/amd64
+    container_name: uav-mcp
+    restart: unless-stopped
+    networks: [uav]
+    ports:
+      - "3030:3030"
+    environment:
+      UAV_BACKEND_URL: http://uav-backend:8080
+      MCP_PORT: "3030"
+    depends_on:
+      uav-backend:
+        condition: service_healthy
+
+networks:
+  uav:
+    driver: bridge
+
+volumes:
+  uav_flight_logs:

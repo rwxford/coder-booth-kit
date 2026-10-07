@@ -1,0 +1,12 @@
+[
+  {"timestamp_ms": 1759790000000, "running": true, "vehicles": [
+    {"callsign": "FL11", "type": "MALE ISR (MQ-9)", "lat": 37.235, "lon": -116.871, "altitudeFt": 18000, "speedKts": 118, "batteryPercent": 72.0, "status": "threat"},
+    {"callsign": "PL07", "type": "Maritime VTOL", "lat": 37.198, "lon": -116.902, "altitudeFt": 2500, "speedKts": 64, "batteryPercent": 55.0, "status": "on patrol"},
+    {"callsign": "VG22", "type": "Base Security Quad", "lat": 37.221, "lon": -116.845, "altitudeFt": 400, "speedKts": 22, "batteryPercent": 31.0, "status": "on patrol"}
+  ]},
+  {"timestamp_ms": 1759790060000, "running": true, "vehicles": [
+    {"callsign": "FL11", "type": "MALE ISR (MQ-9)", "lat": 37.241, "lon": -116.866, "altitudeFt": 18000, "speedKts": 118, "batteryPercent": 71.5, "status": "threat"},
+    {"callsign": "PL07", "type": "Maritime VTOL", "lat": 37.201, "lon": -116.899, "altitudeFt": 2500, "speedKts": 64, "batteryPercent": 54.0, "status": "on patrol"},
+    {"callsign": "VG22", "type": "Base Security Quad", "lat": 37.222, "lon": -116.846, "altitudeFt": 400, "speedKts": 22, "batteryPercent": 29.0, "status": "on patrol"}
+  ]}
+]

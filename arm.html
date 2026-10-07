@@ -1,0 +1,193 @@
+<!doctype html>
+<!--
+Demo arming page, served by the UAV stack's own nginx at /arm.html.
+Copied from coder/usg-edge stacks/uav/arm.html (Austen's island kit) with the
+booth label changed for EAIS. All calls go same-origin through nginx to the
+backend, so it works on localhost, over Tailscale, or behind a proxy.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coder Edge Kit — UAV Demo Control</title>
+<style>
+:root{
+  --ink:#090B0B; --ink-soft:#2F2D33; --white:#fff;
+  --purple-600:#7511E2; --purple-400:#BC7CFF; --cyan:#01F2FF;
+  --coral:#FF8067; --green:#66FFAB;
+  --sans:"Lay Grotesk",system-ui,-apple-system,sans-serif;
+  --mono:"FT System Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{ margin:0; background:var(--ink); color:var(--white);
+  font-family:var(--sans); font-weight:400; font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased }
+.wrap{max-width:44rem; margin:0 auto; padding:44px 28px 64px}
+header{display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:52px}
+.logo{height:26px; width:auto}
+.meta{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,.55); text-align:right; line-height:1.9; white-space:nowrap}
+h1{font-family:var(--sans); font-weight:500; font-size:44px; line-height:1.08;
+  letter-spacing:-.02em; margin:0 0 16px}
+.lede{font-size:19px; line-height:1.55; color:rgba(255,255,255,.72); margin:0 0 40px}
+.label{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--purple-400); margin:0 0 12px}
+button{ width:100%; font-family:var(--sans); color:var(--white); cursor:pointer;
+  background:transparent; border:1px solid rgba(255,255,255,.16); border-radius:10px;
+  transition:border-color .15s ease, background .15s ease }
+button:hover:not(:disabled){ border-color:var(--purple-400); background:rgba(117,17,226,.10) }
+button:disabled{ opacity:.45; cursor:default }
+#arm{ padding:26px; font-weight:500; font-size:19px; letter-spacing:-.01em;
+  border-color:rgba(102,255,171,.35) }
+#arm:hover:not(:disabled){ border-color:var(--green); background:rgba(102,255,171,.09) }
+#arm .sub{ display:block; font-family:var(--mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:rgba(255,255,255,.5); margin-top:7px }
+.row{display:flex; gap:12px; margin-top:12px}
+.row button{padding:13px; font-size:14.5px}
+table{width:100%; border-collapse:collapse; margin:40px 0 0}
+th{ text-align:left; font-family:var(--mono); font-weight:400; font-size:10px;
+  letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.45);
+  padding:9px 0; border-bottom:1px solid rgba(255,255,255,.10) }
+td{ padding:11px 0; border-bottom:1px solid rgba(255,255,255,.07);
+  font-family:var(--mono); font-size:13.5px; letter-spacing:-.02em }
+td.r{text-align:right; font-variant-numeric:tabular-nums}
+.pill{ display:inline-block; padding:3px 10px; border-radius:99px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase }
+.ok{ background:rgba(102,255,171,.13); color:var(--green) }
+.warn{ background:rgba(255,128,103,.14); color:var(--coral) }
+.bad{ background:rgba(255,128,103,.22); color:var(--coral) }
+.dim{color:rgba(255,255,255,.45)}
+#log{ min-height:22px; margin-top:20px; font-family:var(--mono); font-size:12px;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--cyan) }
+.note{ border-left:2px solid var(--coral); padding:2px 0 2px 18px; margin:34px 0 0;
+  color:rgba(255,255,255,.72); font-size:15px }
+.note strong{color:var(--white); font-weight:500}
+footer{ margin-top:56px; padding-top:22px; border-top:1px solid rgba(255,255,255,.10);
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,.4); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap }
+@media (max-width:640px){ .wrap{padding:36px 22px 64px} h1{font-size:34px} .lede{font-size:17px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" src="/brand/coder-logo-white.svg" alt="Coder">
+    <div class="meta">
+      Enterprise AI Summit · Charlotte<br>
+      Coder Edge Kit<br>
+      UNCLASSIFIED // DEMO ONLY
+    </div>
+  </header>
+
+  <h1>Arm the UAV demo.</h1>
+  <p class="lede">Resets the fleet to a known state, trips the scripted threat, and
+  leaves the simulation flying at a rate that survives a full visit.</p>
+
+  <p class="label">Control</p>
+  <button id="arm">ARM DEMO<span class="sub">reset · warm up · run at 2×</span></button>
+  <div class="row">
+    <button id="pause">Pause</button>
+    <button id="resume">Resume</button>
+  </div>
+  <div id="log"></div>
+
+  <table>
+    <tr><th>Simulation</th><th class="r">State</th></tr>
+    <tr><td class="dim">Status</td><td class="r" id="state"><span class="pill warn">connecting</span></td></tr>
+    <tr><td class="dim">Rate <span style="opacity:.5">(set here)</span></td><td class="r" id="rate">unknown</td></tr>
+    <tr><td class="dim">Alert history</td><td class="r" id="alerts">—</td></tr>
+  </table>
+  <table id="fleet"></table>
+
+  <div class="note">
+    <strong>ARM</strong> gives roughly a 20&nbsp;minute window before batteries want
+    another arm — one visitor per arm at 2×. Alert history is append-only in backend
+    memory; only <code>./90-uav-down.sh &amp;&amp; ./10-uav-up.sh</code> clears it.
+  </div>
+
+  <footer>
+    <span>Coder Edge Kit</span>
+    <span id="host"></span>
+  </footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+$('host').textContent = location.host;
+const post = (path, body) =>
+  fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body) });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const say = (m) => { $('log').textContent = m; };
+
+const setRate = (r) => {
+  try { if (r != null) localStorage.setItem('uavRate', String(r)); } catch {}
+  let v = null; try { v = localStorage.getItem('uavRate'); } catch {}
+  $('rate').textContent = v ? v + '×' : 'unknown';
+};
+setRate(null);
+
+async function arm() {
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach((b) => (b.disabled = true));
+  try {
+    say('resetting…');
+    await post('/api/scenarios/switch', { scenarioId: 'defense_training' });
+    await post('/api/simulation/control', { command: 'reset' });
+    await post('/api/simulation/control', { command: 'resume' });
+    await post('/api/simulation/timescale', { multiplier: 20 }); setRate(20);
+    for (let s = 15; s > 0; s--) { say(`warming up at 20× · ${s}s`); await sleep(1000); }
+    await post('/api/simulation/timescale', { multiplier: 2 }); setRate(2);
+    say('armed · running at 2×');
+  } catch (e) {
+    say('arm failed: ' + e.message);
+  } finally {
+    buttons.forEach((b) => (b.disabled = false));
+  }
+}
+$('arm').onclick = arm;
+$('pause').onclick = () => post('/api/simulation/control', { command: 'pause' }).then(() => say('paused'));
+$('resume').onclick = () => post('/api/simulation/control', { command: 'resume' }).then(() => say('resumed'));
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${proto}//${location.host}/api/simulation/telemetry`);
+  ws.onclose = () => {
+    $('state').innerHTML = '<span class="pill bad">disconnected</span>';
+    setTimeout(connect, 3000);
+  };
+  ws.onmessage = (ev) => {
+    let f; try { f = JSON.parse(ev.data); } catch { return; }
+    $('state').innerHTML = f.running
+      ? '<span class="pill ok">running</span>'
+      : '<span class="pill warn">paused</span>';
+    const rows = (f.vehicles || []).map((v) => {
+      const b = v.batteryPercent ?? 0;
+      const cls = b < 30 ? 'bad' : b < 50 ? 'warn' : 'ok';
+      return `<tr><td class="dim">${v.callsign}</td>
+              <td class="r"><span class="pill ${cls}">${b.toFixed(0)}%</span></td></tr>`;
+    });
+    $('fleet').innerHTML = rows.length
+      ? `<tr><th>Fleet</th><th class="r">Battery</th></tr>${rows.join('')}` : '';
+    window.__fleet = new Set((f.vehicles || []).map((v) => v.callsign));
+  };
+}
+connect();
+
+async function alerts() {
+  try {
+    const d = await (await fetch('/api/alerts/history')).json();
+    const list = Array.isArray(d) ? d : (d.alerts || []);
+    const seen = new Set(list.map((a) => a.callsign || a.vehicleCallsign).filter(Boolean));
+    const fleet = window.__fleet;
+    const stale = fleet ? [...seen].filter((c) => !fleet.has(c)) : [];
+    $('alerts').innerHTML = stale.length
+      ? `<span class="pill bad">${list.length} · stale ${stale.join(' ')}</span>`
+      : `<span class="pill ok">${list.length}</span>`;
+  } catch { $('alerts').textContent = '—'; }
+}
+alerts();
+setInterval(alerts, 10000);
+</script>
+</body>
+</html>

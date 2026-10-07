@@ -1,0 +1,23 @@
+# Fetched at runtime from bppRomperRoom/coder-edge-kit (image tarballs); never commit
+coder-edge-kit/
+images/
+
+# Per-run state
+tunnel.log
+map-tunnel.log
+urls.txt
+coder-url.txt
+repo-url.txt
+
+# Rendered video artifacts (regenerate with video/render.py + video/build.sh)
+video/frames/
+video/scenes.txt
+video/*.mp4
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+.DS_Store
