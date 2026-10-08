@@ -5,7 +5,7 @@ Three screens: booth monitor (Coder UI, mirrored from the Mac), MacBook (your co
 ## 0. Before the first visitor
 - `./check.sh` is green. Arm page shows **running**.
 - Coder: two workspaces pre-built and running from **Coder Agents Generic** (name them `fleet-ops-1`, `fleet-ops-2`), each with `fleet-ops` cloned:
-  `git clone https://gitea--pk36.demos.cdrsandboxes.com/admin/fleet-ops.git` (public, no token).
+  `git clone https://gitea--quz9.demos.cdrsandboxes.com/admin/fleet-ops.git` (public, no token).
 - Agents chat open in one tab. MCP server `uav-sim` registered and showing tools.
 - Bookmarks bar: Templates · Workspaces · Agents · Admin AI (governance) · Gitea issues · arm page.
 
@@ -18,7 +18,7 @@ Templates → open `fleet-ops-1`. "Ubuntu, Node, Python, git, code-server. The r
 ## 3. Agent on the repo (45 s) — the seeded-repo moment
 In Agents (or Claude Code inside the workspace), prompt:
 
-> Clone https://gitea--pk36.demos.cdrsandboxes.com/admin/fleet-ops.git if it isn't here, read `docs/ISSUES.md`, summarize the open issues in one line each, then fix issue #3 and prove it with `pytest -q` (use a venv: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`; the system pip is locked).
+> Clone https://gitea--quz9.demos.cdrsandboxes.com/admin/fleet-ops.git if it isn't here, read `docs/ISSUES.md`, summarize the open issues in one line each, then fix issue #3 and prove it with `pytest -q` (use a venv: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`; the system pip is locked).
 
 What happens: it reads the five issues, finds the 60x unit bug in `fleet_ops/battery.py` (`/ 1000.0` should be `/ 60000.0`), patches it, tests go from 1 failed to 5 passed. Say: "That ran in a governed workspace: model allow-listed, spend budgeted, every tool call logged."
 

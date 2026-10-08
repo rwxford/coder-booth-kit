@@ -21,16 +21,16 @@ Already done tonight: the `eais` demobuilder env was extended to its 24h cap
    It ends by printing `urls.txt`. First run downloads ~1–2 GB of image tarballs; after that it's seconds.
 3. Seed the repo into Gitea (needs the admin password from DemoBuilder › Personas › Admin › Reveal):
    ```bash
-   ./20-seed-gitea.sh https://gitea--pk36.demos.cdrsandboxes.com
+   ./20-seed-gitea.sh https://gitea--quz9.demos.cdrsandboxes.com
    ```
 4. Register the MCP server in Coder (manual, 1 minute). See `30-register-mcp.md`.
    Then build the two workspaces from **Coder Agents Generic** (`fleet-ops-1`, `fleet-ops-2`). The template asks
    for **Login with Gitea** once (OAuth consent as the admin persona); after that, in each workspace terminal:
-   `git clone https://gitea--pk36.demos.cdrsandboxes.com/admin/fleet-ops.git && cd fleet-ops && python3 -m venv .venv && source .venv/bin/activate && pip install -q -r requirements.txt && pytest -q`
+   `git clone https://gitea--quz9.demos.cdrsandboxes.com/admin/fleet-ops.git && cd fleet-ops && python3 -m venv .venv && source .venv/bin/activate && pip install -q -r requirements.txt && pytest -q`
    → `1 failed, 4 passed`. That failure is issue #3.
 5. `./check.sh` — everything green. Put the Coder URL in `coder-url.txt` so check.sh tests it too:
    ```bash
-   echo https://coder--pk36.demos.cdrsandboxes.com > coder-url.txt
+   echo https://coder--quz9.demos.cdrsandboxes.com > coder-url.txt
    ```
 6. iPad: open the Tailscale URL from `urls.txt` (`http://<mac-tailscale-ip>:8081`). Add to Home Screen.
    `/arm.html` on the iPad re-arms the sim between visitors (every ~20 min).

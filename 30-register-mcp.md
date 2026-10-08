@@ -7,7 +7,7 @@ through a cloudflared quick tunnel and prints the public URL in `urls.txt`
 
 ## Steps (Coder admin, about 1 minute)
 
-1. Go straight to the form (admin persona): `https://coder--pk36.demos.cdrsandboxes.com/ai/settings/mcp-servers/add?org=coder`
+1. Go straight to the form (admin persona): `https://coder--quz9.demos.cdrsandboxes.com/ai/settings/mcp-servers/add?org=coder`
    (nav path: Admin settings › AI › **MCP servers** › **Add server**).
 2. Fill in:
    - Slug: `uav-sim`  ·  Display name: `UAV Defense Simulator`  ·  Organization: Coder
